@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Definición del modelo VehicleType
+model VehicleType {
+  id          String    @id @default(uuid())
+  name        String    @unique // Nombre del tipo (ej: Coche Sedán, Camión Ligero)
+  maxDrivers  Int       @default(1) // Cantidad máxima de conductores permitidos
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  vehicles    Vehicle[] // Relación uno a muchos con Vehicle
+}
+
+// Definición del modelo Vehicle
+model Vehicle {
+  id            String    @id @default(uuid())
+  make          String
+  model         String
+  year          Int
+  licensePlate  String    @unique
+  vin           String    @unique
+  purchaseDate  DateTime? // Añadir campo de fecha de compra (opcional por ahora)
+  status        String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relación con VehicleType (Obligatoria)
+  vehicleTypeId String
+  vehicleType   VehicleType @relation(fields: [vehicleTypeId], references: [id])
+
+  // Relación Muchos a Muchos con Driver
+  drivers       Driver[] // Un vehículo puede tener muchos conductores asignados
+}
+
+// Definición del modelo Driver
+model Driver {
+  id            String    @id @default(uuid())
+  name          String
+  licenseNumber String    @unique
+  contactPhone  String?
+  email         String?   @unique
+  status        String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relación Muchos a Muchos con Vehicle
+  vehicles      Vehicle[] // Un conductor puede usar muchos vehículos
+}
