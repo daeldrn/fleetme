@@ -5,7 +5,7 @@ import { updateDriver, DriverFormState } from '@/app/drivers/actions'; // Import
 import type { Driver } from '@prisma/client'; // Importar tipo de Prisma
 import Link from 'next/link';
 import SubmitButton from '@/components/SubmitButton'; // Importar el componente SubmitButton compartido
-import { DRIVER_STATUS } from '@/constants/drivers'; // Importar la constante de estados desde la nueva ubicación
+import { DRIVER_STATUS, LICENSE_CATEGORIES } from '@/constants/drivers'; // Importar las constantes de estados y categorías de licencia
 import toast from 'react-hot-toast'; // Importar toast
 import { redirect } from 'next/navigation'; // Importar redirect
 
@@ -117,6 +117,31 @@ export default function EditDriverForm({ driver }: EditDriverFormProps) {
         </div>
       </div>
 
+      {/* Campo Categoría Licencia */}
+      <div>
+        <label htmlFor="licenseCategory" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría Licencia</label>
+        <select
+          name="licenseCategory"
+          id="licenseCategory"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+          defaultValue={driver.licenseCategory ?? ''} // Usar defaultValue con el valor actual o vacío
+          aria-describedby="licenseCategory-error"
+        >
+          <option value="">Seleccione una categoría...</option> {/* Opción por defecto */}
+          {LICENSE_CATEGORIES.map(category => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
+        <div id="licenseCategory-error" aria-live="polite" aria-atomic="true">
+          {state?.errors?.licenseCategory &&
+            state.errors.licenseCategory.map((error: string) => (
+              <p className="mt-2 text-sm text-red-500" key={error}>{error}</p>
+            ))}
+        </div>
+      </div>
+
        {/* Campo Estado */}
       <div>
         <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
@@ -124,7 +149,7 @@ export default function EditDriverForm({ driver }: EditDriverFormProps) {
           name="status"
           id="status"
           required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
           defaultValue={driver.status}
           aria-describedby="status-error"
         >

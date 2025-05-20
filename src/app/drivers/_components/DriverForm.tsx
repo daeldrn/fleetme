@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
 import SubmitButton from '@/components/SubmitButton';
-import { DRIVER_STATUS } from '@/constants/drivers';
+import { DRIVER_STATUS, LICENSE_CATEGORIES } from '@/constants/drivers'; // Importar las constantes de estados y categorías de licencia
 import type { Driver } from '@prisma/client';
 import { useEffect, useTransition } from 'react'; // Importar useEffect y useTransition
 import toast from 'react-hot-toast'; // Importar toast
@@ -256,16 +256,23 @@ export default function DriverForm({ initialData, action }: DriverFormProps) {
       {/* Campo Categoría de Licencia (Opcional) */}
       <div>
         <label htmlFor="licenseCategory" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría de Licencia</label>
-        <input
-          type="text"
+        <select
           id="licenseCategory"
-          {...register('licenseCategory')} // Registrar el input
-           className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white ${
+          {...register('licenseCategory')} // Registrar el select
+          className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white ${
             errors.licenseCategory || serverState?.errors?.licenseCategory ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
           }`}
           aria-invalid={errors.licenseCategory || serverState?.errors?.licenseCategory ? 'true' : 'false'}
           aria-describedby="licenseCategory-error"
-        />
+          defaultValue="" // Establecer un valor por defecto vacío para la opción "Seleccione una categoría..."
+        >
+          <option value="">Seleccione una categoría...</option> {/* Opción por defecto */}
+          {LICENSE_CATEGORIES.map(category => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
          {(errors.licenseCategory || serverState?.errors?.licenseCategory) && (
           <div id="licenseCategory-error" aria-live="polite" aria-atomic="true">
             {(errors.licenseCategory?.message || serverState?.errors?.licenseCategory?.[0]) && (

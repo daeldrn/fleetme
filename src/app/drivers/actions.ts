@@ -3,9 +3,10 @@
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { DRIVER_STATUS } from '@/constants/drivers'; // Importar la constante de estados desde la nueva ubicación
+import { DRIVER_STATUS, LICENSE_CATEGORIES } from '@/constants/drivers'; // Importar las constantes de estados y categorías de licencia
 
 export type DriverStatus = typeof DRIVER_STATUS[number];
+export type LicenseCategory = typeof LICENSE_CATEGORIES[number]; // Exportar tipo para la categoría de licencia
 
 import { redirect } from 'next/navigation';
 import { Prisma } from '@prisma/client';
@@ -39,7 +40,15 @@ const DriverSchema = z.object({
   }, {
     message: 'Fecha de vencimiento de licencia inválida.',
   }),
-  licenseCategory: z.string().optional(), // Añadir campo para categoría de licencia
+  licenseCategory: z.enum(LICENSE_CATEGORIES as unknown as [string, ...string[]], { // Usar 'as unknown as [string, ...string[]]' para compatibilidad con z.enum
+    errorMap: (issue, _ctx) => {
+      if (issue.code === z.ZodIssueCode.invalid_enum_value) {
+        return { message: `Categoría de licencia inválida. Debe ser una de: ${LICENSE_CATEGORIES.join(', ')}` };
+      }
+      // Asegurar que el mensaje siempre sea un string
+      return { message: issue.message || 'Error de validación en la categoría de licencia.' };
+    },
+  }).optional(), // Hacer el campo opcional si es necesario, o .default(LICENSE_CATEGORIES[0]) si debe tener un valor por defecto
   status: z.enum(DRIVER_STATUS), // Usar la constante para los estados
 });
 
@@ -86,18 +95,23 @@ export async function addDriver(
     };
   }
 
-   // Preparar datos para Prisma (manejar privateAddress y fechas opcionales/nulas)
-   const dataToSave = {
-     ...validatedFields.data,
-     privateAddress: validatedFields.data.privateAddress || null, // Guardar null si privateAddress está vacío
+   // Preparar datos para Prisma (manejar privateAddress, fechas opcionales/nulas y licenseCategory opcional)
+   const dataToSave: Prisma.DriverCreateInput = { // Tipar explícitamente para mejor seguridad
+     name: validatedFields.data.name,
+     licenseNumber: validatedFields.data.licenseNumber,
+     contactPhone: validatedFields.data.contactPhone || null, // Guardar null si está vacío
+     privateAddress: validatedFields.data.privateAddress || null, // Guardar null si está vacío
      licenseExpirationDate: validatedFields.data.licenseExpirationDate ? new Date(validatedFields.data.licenseExpirationDate) : null, // Convertir a Date o null
+     licenseCategory: validatedFields.data.licenseCategory || null, // Guardar null si está vacío
+     status: validatedFields.data.status,
+     // createdAt y updatedAt son manejados por @default y @updatedAt en el schema
    };
 
 
   // 3. Guardar en DB
   try {
     await prisma.driver.create({
-      data: dataToSave,
+      data: dataToSave as any, // Usar 'as any' temporalmente si hay problemas de tipo persistentes con Prisma
     });
   } catch (error) {
     return { message: handlePrismaError(error, 'añadir') };
@@ -196,18 +210,22 @@ export async function updateDriver(
     };
   }
 
-  // Preparar datos para Prisma (manejar privateAddress y fechas opcionales/nulas)
-   const dataToUpdate = {
-     ...validatedFields.data,
-     privateAddress: validatedFields.data.privateAddress || null, // Guardar null si privateAddress está vacío
+  // Preparar datos para Prisma (manejar privateAddress, fechas opcionales/nulas y licenseCategory opcional)
+   const dataToUpdate: Prisma.DriverUpdateInput = { // Tipar explícitamente
+     name: validatedFields.data.name,
+     licenseNumber: validatedFields.data.licenseNumber,
+     contactPhone: validatedFields.data.contactPhone || null, // Guardar null si está vacío
+     privateAddress: validatedFields.data.privateAddress || null, // Guardar null si está vacío
      licenseExpirationDate: validatedFields.data.licenseExpirationDate ? new Date(validatedFields.data.licenseExpirationDate) : null, // Convertir a Date o null
+     licenseCategory: validatedFields.data.licenseCategory || null, // Guardar null si está vacío
+     status: validatedFields.data.status,
    };
 
   // 3. Si la validación es exitosa, actualizar el conductor en la DB
   try {
     await prisma.driver.update({
       where: { id: id },
-      data: dataToUpdate,
+      data: dataToUpdate as any, // Usar 'as any' temporalmente si hay problemas de tipo persistentes con Prisma
     });
   } catch (error) {
      return { message: handlePrismaError(error, 'actualizar') };
