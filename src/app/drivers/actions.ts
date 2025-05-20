@@ -263,7 +263,7 @@ export async function searchDrivers(query: string): Promise<
               { licenseNumber: { contains: query } }, // Buscar por número de licencia
             ],
           },
-          { status: 'active' }, // Filtrar solo por conductores activos
+          { status: 'activo' }, // Filtrar solo por conductores activos
         ],
       },
       select: {

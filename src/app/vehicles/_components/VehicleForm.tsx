@@ -261,7 +261,7 @@ export default function VehicleForm({ initialData, vehicleTypes, action }: Vehic
           id="status"
           required
           className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
-          defaultValue={initialData?.status || 'active'} // Usar defaultValue
+          defaultValue={initialData?.status || 'activo'} // Usar defaultValue
           aria-describedby="status-error"
         >
           {VEHICLE_STATUS.map(status => (

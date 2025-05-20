@@ -255,10 +255,10 @@ export default function EditVehicleForm({ vehicle, vehicleTypes }: EditVehicleFo
           defaultValue={vehicle.status}
           aria-describedby="status-error"
         >
-          <option value="active">Activo</option>
-          <option value="maintenance">Mantenimiento</option>
-          <option value="sold">Vendido</option>
-          <option value="inactive">Inactivo</option>
+          <option value="activo">Activo</option>
+          <option value="mantenimiento">Mantenimiento</option>
+          <option value="vendido">Vendido</option>
+          <option value="inactivo">Inactivo</option>
         </select>
          <div id="status-error" aria-live="polite" aria-atomic="true">
           {state?.errors?.status &&
