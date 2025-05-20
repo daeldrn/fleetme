@@ -48,11 +48,13 @@ model Driver {
   name          String
   licenseNumber String    @unique
   contactPhone  String?
-  email         String?   @unique
-  status        String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  privateAddress      String? // Cambiado de email a privateAddress y removido @unique
+  licenseExpirationDate DateTime? // Añadir campo para la fecha de vencimiento de la licencia
+  licenseCategory       String? // Añadir campo para la categoría de la licencia
+  status                String
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   // Relación Muchos a Muchos con Vehicle
-  vehicles      Vehicle[] // Un conductor puede usar muchos vehículos
+  vehicles              Vehicle[] // Un conductor puede usar muchos vehículos
 }

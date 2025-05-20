@@ -17,7 +17,14 @@ const DriverSchema = z.object({
   name: z.string().min(1, { message: 'El nombre es requerido.' }),
   licenseNumber: z.string().min(1, { message: 'El número de licencia es requerido.' }),
   contactPhone: z.string().optional(),
-  email: z.string().email({ message: 'Email inválido.' }).optional().or(z.literal('')),
+  privateAddress: z.string().optional(), // Cambiado de email a privateAddress, ahora opcional sin validación de email
+  licenseExpirationDate: z.string().optional().refine((date) => { // Añadir validación para fecha de vencimiento
+    if (!date) return true; // Campo opcional
+    return !isNaN(new Date(date).getTime()); // Validar que sea una fecha válida
+  }, {
+    message: 'Fecha de vencimiento de licencia inválida.',
+  }),
+  licenseCategory: z.string().optional(), // Añadir campo para categoría de licencia
   status: z.enum(DRIVER_STATUS),
 });
 
@@ -45,14 +52,18 @@ export default function DriverForm({ initialData, action }: DriverFormProps) {
         name: initialData.name,
         licenseNumber: initialData.licenseNumber,
         contactPhone: initialData.contactPhone ?? '', // Asegurar string vacío para campos opcionales null
-        email: initialData.email ?? '', // Asegurar string vacío para campos opcionales null
+        privateAddress: initialData.privateAddress ?? '', // Usar privateAddress
+        licenseExpirationDate: initialData.licenseExpirationDate?.toISOString().split('T')[0] ?? '', // Formatear fecha para input type="date"
+        licenseCategory: initialData.licenseCategory ?? '', // Usar licenseCategory
         status: initialData.status as DriverFormValues['status'], // Convertir explícitamente el tipo
     } : { // Valores por defecto para creación
       name: '',
       licenseNumber: '',
       contactPhone: '',
-      email: '',
-      status: 'active', // Valor por defecto para el estado
+      privateAddress: '', // Usar privateAddress
+      licenseExpirationDate: '', // Valor por defecto vacío para fecha
+      licenseCategory: '', // Valor por defecto vacío para categoría
+      status: 'activo', // Valor por defecto para el estado
     },
   });
 
@@ -68,7 +79,9 @@ export default function DriverForm({ initialData, action }: DriverFormProps) {
     formData.append('licenseNumber', data.licenseNumber);
     // Solo añadir campos opcionales si tienen valor
     if (data.contactPhone) formData.append('contactPhone', data.contactPhone);
-    if (data.email) formData.append('email', data.email);
+    if (data.privateAddress) formData.append('privateAddress', data.privateAddress); // Cambiado de email a privateAddress
+    if (data.licenseExpirationDate) formData.append('licenseExpirationDate', data.licenseExpirationDate); // Añadir fecha de vencimiento
+    if (data.licenseCategory) formData.append('licenseCategory', data.licenseCategory); // Añadir categoría de licencia
     formData.append('status', data.status);
 
     // Si estamos editando, añadir el ID
@@ -90,7 +103,9 @@ export default function DriverForm({ initialData, action }: DriverFormProps) {
          name: initialData.name,
          licenseNumber: initialData.licenseNumber,
          contactPhone: initialData.contactPhone ?? '',
-         email: initialData.email ?? '',
+         privateAddress: initialData.privateAddress ?? '', // Usar privateAddress
+         licenseExpirationDate: initialData.licenseExpirationDate?.toISOString().split('T')[0] ?? '', // Formatear fecha para input type="date"
+         licenseCategory: initialData.licenseCategory ?? '', // Usar licenseCategory
          status: initialData.status as DriverFormValues['status'], // Convertir explícitamente el tipo
        });
      } else {
@@ -99,8 +114,10 @@ export default function DriverForm({ initialData, action }: DriverFormProps) {
          name: '',
          licenseNumber: '',
          contactPhone: '',
-         email: '',
-         status: 'active',
+         privateAddress: '', // Usar privateAddress
+         licenseExpirationDate: '', // Valor por defecto vacío para fecha
+         licenseCategory: '', // Valor por defecto vacío para categoría
+         status: 'activo',
        });
      }
    }, [initialData, reset]);
@@ -192,23 +209,67 @@ export default function DriverForm({ initialData, action }: DriverFormProps) {
         )}
       </div>
 
-      {/* Campo Email (Opcional) */}
+      {/* Campo Direccion Particular (Opcional) */}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+        <label htmlFor="privateAddress" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Dirección Particular</label>
         <input
-          type="email"
-          id="email"
-          {...register('email')} // Registrar el input
+          type="text" // Cambiado de email a text
+          id="privateAddress"
+          {...register('privateAddress')} // Registrar el input con privateAddress
            className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white ${
-            errors.email || serverState?.errors?.email ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+            errors.privateAddress || serverState?.errors?.privateAddress ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
           }`}
-          aria-invalid={errors.email || serverState?.errors?.email ? 'true' : 'false'}
-          aria-describedby="email-error"
+          aria-invalid={errors.privateAddress || serverState?.errors?.privateAddress ? 'true' : 'false'}
+          aria-describedby="privateAddress-error" // Actualizar aria-describedby
         />
-         {(errors.email || serverState?.errors?.email) && (
-          <div id="email-error" aria-live="polite" aria-atomic="true">
-            {(errors.email?.message || serverState?.errors?.email?.[0]) && (
-              <p className="mt-2 text-sm text-red-500">{errors.email?.message || serverState.errors.email[0]}</p>
+         {(errors.privateAddress || serverState?.errors?.privateAddress) && ( // Usar privateAddress
+          <div id="privateAddress-error" aria-live="polite" aria-atomic="true"> {/* Actualizar id */}
+            {(errors.privateAddress?.message || serverState?.errors?.privateAddress?.[0]) && ( // Usar privateAddress
+              <p className="mt-2 text-sm text-red-500">{errors.privateAddress?.message || serverState.errors.privateAddress[0]}</p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Campo Fecha de Vencimiento de Licencia (Opcional) */}
+      <div>
+        <label htmlFor="licenseExpirationDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de Vencimiento de Licencia</label>
+        <input
+          type="date" // Usar type="date" para el selector de fecha
+          id="licenseExpirationDate"
+          {...register('licenseExpirationDate')} // Registrar el input
+           className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white ${
+            errors.licenseExpirationDate || serverState?.errors?.licenseExpirationDate ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+          }`}
+          aria-invalid={errors.licenseExpirationDate || serverState?.errors?.licenseExpirationDate ? 'true' : 'false'}
+          aria-describedby="licenseExpirationDate-error"
+        />
+         {(errors.licenseExpirationDate || serverState?.errors?.licenseExpirationDate) && (
+          <div id="licenseExpirationDate-error" aria-live="polite" aria-atomic="true">
+            {(errors.licenseExpirationDate?.message || serverState?.errors?.licenseExpirationDate?.[0]) && (
+              <p className="mt-2 text-sm text-red-500">{errors.licenseExpirationDate?.message || serverState.errors.licenseExpirationDate[0]}</p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Campo Categoría de Licencia (Opcional) */}
+      <div>
+        <label htmlFor="licenseCategory" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría de Licencia</label>
+        <input
+          type="text"
+          id="licenseCategory"
+          {...register('licenseCategory')} // Registrar el input
+           className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white ${
+            errors.licenseCategory || serverState?.errors?.licenseCategory ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+          }`}
+          aria-invalid={errors.licenseCategory || serverState?.errors?.licenseCategory ? 'true' : 'false'}
+          aria-describedby="licenseCategory-error"
+        />
+         {(errors.licenseCategory || serverState?.errors?.licenseCategory) && (
+          <div id="licenseCategory-error" aria-live="polite" aria-atomic="true">
+            {(errors.licenseCategory?.message || serverState?.errors?.licenseCategory?.[0]) && (
+              <p className="mt-2 text-sm text-red-500">{errors.licenseCategory?.message || serverState.errors.licenseCategory[0]}</p>
             )}
           </div>
         )}

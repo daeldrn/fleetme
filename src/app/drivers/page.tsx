@@ -8,11 +8,11 @@ export const dynamic = 'force-dynamic'; // Renderizado dinámico
 // Helper para obtener clases de estilo basadas en el estado del conductor
 function getDriverStatusClasses(status: string): string {
   switch (status) {
-    case 'active':
+    case 'activo':
       return 'bg-green-100 text-green-800';
-    case 'on_leave':
+    case 'de Permiso':
       return 'bg-yellow-100 text-yellow-800';
-    case 'inactive':
+    case 'inactivo':
       return 'bg-red-100 text-red-800';
     default:
       return 'bg-gray-100 text-gray-800';
@@ -64,7 +64,9 @@ export default async function DriversPage() {
               <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
               <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nº Licencia</th>
               <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Teléfono</th>
-              <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
+              <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Dirección Particular</th> {/* Cambiado de Email a Dirección Particular */}
+              <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Vencimiento Licencia</th> {/* Nuevo encabezado */}
+              <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Categoría Licencia</th> {/* Nuevo encabezado */}
               <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado</th>
               <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
             </tr>
@@ -72,7 +74,7 @@ export default async function DriversPage() {
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {drivers.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-4 px-4 text-center text-gray-500 dark:text-gray-400">
+                <td colSpan={8} className="py-4 px-4 text-center text-gray-500 dark:text-gray-400"> {/* Aumentar colSpan */}
                   No hay conductores registrados.
                 </td>
               </tr>
@@ -82,7 +84,9 @@ export default async function DriversPage() {
                   <td className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{driver.name}</td>
                   <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{driver.licenseNumber}</td>
                   <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{driver.contactPhone ?? '-'}</td>
-                  <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{driver.email ?? '-'}</td>
+                  <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{driver.privateAddress ?? '-'}</td> {/* Mostrar privateAddress */}
+                  <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{driver.licenseExpirationDate?.toDateString() ?? '-'}</td> {/* Mostrar fecha de vencimiento */}
+                  <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{driver.licenseCategory ?? '-'}</td> {/* Mostrar categoría */}
                   <td className="py-4 px-4 whitespace-nowrap">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getDriverStatusClasses(driver.status)}`} // Usar la función helper

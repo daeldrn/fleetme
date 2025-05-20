@@ -22,13 +22,13 @@ const DeleteIcon = () => (
 // Helper para obtener clases de estilo basadas en el estado del vehículo
 function getStatusClasses(status: string): string {
   switch (status) {
-    case 'active':
+    case 'activo':
       return 'bg-green-100 text-green-800';
-    case 'maintenance':
+    case 'mantenimiento':
       return 'bg-yellow-100 text-yellow-800';
-    case 'sold':
+    case 'inactivo':
       return 'bg-red-100 text-red-800';
-    case 'inactive':
+    case 'vendido':
       return 'bg-gray-100 text-gray-800'; // Añadir estilo para inactivo si es necesario
     default:
       return 'bg-gray-100 text-gray-800';

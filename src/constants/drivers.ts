@@ -1,2 +1,2 @@
 // Constante para los estados del conductor
-export const DRIVER_STATUS = ['active', 'inactive', 'on_leave'] as const;
+export const DRIVER_STATUS = ['activo', 'inactivo', 'de Permiso'] as const;

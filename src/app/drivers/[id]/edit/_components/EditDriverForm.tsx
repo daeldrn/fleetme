@@ -98,20 +98,20 @@ export default function EditDriverForm({ driver }: EditDriverFormProps) {
         </div>
       </div>
 
-      {/* Campo Email (Opcional) */}
+      {/* Campo Direccion Particular (Opcional) */}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+        <label htmlFor="privateAddress" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Dirección Particular</label>
         <input
-          type="email"
-          name="email"
-          id="email"
+          type="text" // Cambiado de email a text
+          name="privateAddress"
+          id="privateAddress"
           className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
-          defaultValue={driver.email ?? ''} // Manejar posible null
-          aria-describedby="email-error"
+          defaultValue={driver.privateAddress ?? ''} // Usar privateAddress
+          aria-describedby="privateAddress-error" // Actualizar aria-describedby
         />
-         <div id="email-error" aria-live="polite" aria-atomic="true">
-          {state?.errors?.email &&
-            state.errors.email.map((error: string) => (
+         <div id="privateAddress-error" aria-live="polite" aria-atomic="true"> {/* Actualizar id */}
+          {state?.errors?.privateAddress && // Usar privateAddress
+            state.errors.privateAddress.map((error: string) => (
               <p className="mt-2 text-sm text-red-500" key={error}>{error}</p>
             ))}
         </div>

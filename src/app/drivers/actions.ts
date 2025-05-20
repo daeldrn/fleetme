@@ -32,7 +32,14 @@ const DriverSchema = z.object({
   name: z.string().min(1, { message: 'El nombre es requerido.' }),
   licenseNumber: z.string().min(1, { message: 'El número de licencia es requerido.' }),
   contactPhone: z.string().optional(), // Opcional
-  email: z.string().email({ message: 'Email inválido.' }).optional().or(z.literal('')), // Opcional pero debe ser email válido o vacío
+  privateAddress: z.string().optional(), // Cambiado de email a privateAddress, ahora opcional sin validación de email
+  licenseExpirationDate: z.string().optional().refine((date) => { // Añadir validación para fecha de vencimiento
+    if (!date) return true; // Campo opcional
+    return !isNaN(new Date(date).getTime()); // Validar que sea una fecha válida
+  }, {
+    message: 'Fecha de vencimiento de licencia inválida.',
+  }),
+  licenseCategory: z.string().optional(), // Añadir campo para categoría de licencia
   status: z.enum(DRIVER_STATUS), // Usar la constante para los estados
 });
 
@@ -43,7 +50,9 @@ export type DriverFormState = {
     name?: string[];
     licenseNumber?: string[];
     contactPhone?: string[];
-    email?: string[];
+    privateAddress?: string[]; // Cambiado de email a privateAddress
+    licenseExpirationDate?: string[]; // Añadir error para fecha de vencimiento
+    licenseCategory?: string[]; // Añadir error para categoría de licencia
     status?: string[];
   };
   toastMessage?: { // Añadir campo para mensajes de toast
@@ -62,7 +71,9 @@ export async function addDriver(
     name: formData.get('name'),
     licenseNumber: formData.get('licenseNumber'),
     contactPhone: formData.get('contactPhone'),
-    email: formData.get('email'),
+    privateAddress: formData.get('privateAddress'), // Cambiado de email a privateAddress
+    licenseExpirationDate: formData.get('licenseExpirationDate'), // Obtener fecha de vencimiento
+    licenseCategory: formData.get('licenseCategory'), // Obtener categoría de licencia
     status: formData.get('status'),
   });
 
@@ -75,10 +86,11 @@ export async function addDriver(
     };
   }
 
-   // Preparar datos para Prisma (manejar email opcional vacío)
+   // Preparar datos para Prisma (manejar privateAddress y fechas opcionales/nulas)
    const dataToSave = {
      ...validatedFields.data,
-     email: validatedFields.data.email || null, // Guardar null si el email está vacío
+     privateAddress: validatedFields.data.privateAddress || null, // Guardar null si privateAddress está vacío
+     licenseExpirationDate: validatedFields.data.licenseExpirationDate ? new Date(validatedFields.data.licenseExpirationDate) : null, // Convertir a Date o null
    };
 
 
@@ -151,7 +163,7 @@ export async function deleteDriver(
 }
 
 
-// --- Server Action para Actualizar Conductor ---
+  // --- Server Action para Actualizar Conductor ---
 
 export async function updateDriver(
   id: string, // Necesitamos el ID para saber qué vehículo actualizar
@@ -169,7 +181,9 @@ export async function updateDriver(
     name: formData.get('name'),
     licenseNumber: formData.get('licenseNumber'),
     contactPhone: formData.get('contactPhone'),
-    email: formData.get('email'),
+    privateAddress: formData.get('privateAddress'), // Cambiado de email a privateAddress
+    licenseExpirationDate: formData.get('licenseExpirationDate'), // Obtener fecha de vencimiento
+    licenseCategory: formData.get('licenseCategory'), // Obtener categoría de licencia
     status: formData.get('status'),
   });
 
@@ -182,10 +196,11 @@ export async function updateDriver(
     };
   }
 
-  // Preparar datos para Prisma (manejar email opcional vacío)
+  // Preparar datos para Prisma (manejar privateAddress y fechas opcionales/nulas)
    const dataToUpdate = {
      ...validatedFields.data,
-     email: validatedFields.data.email || null, // Guardar null si el email está vacío
+     privateAddress: validatedFields.data.privateAddress || null, // Guardar null si privateAddress está vacío
+     licenseExpirationDate: validatedFields.data.licenseExpirationDate ? new Date(validatedFields.data.licenseExpirationDate) : null, // Convertir a Date o null
    };
 
   // 3. Si la validación es exitosa, actualizar el conductor en la DB
