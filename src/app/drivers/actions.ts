@@ -187,7 +187,10 @@ export async function updateDriver(
 
    // Validar que el ID existe (básico)
   if (!id) {
-    return { message: 'Error: ID de conductor no proporcionado para la actualización.' };
+    return {
+      message: 'Error: ID de conductor no proporcionado para la actualización.',
+      toastMessage: { type: 'error', message: 'Error: ID de conductor no proporcionado para la actualización.' }, // Añadir toast de error
+    };
   }
 
   // 1. Validar los datos del formulario usando Zod
@@ -207,6 +210,7 @@ export async function updateDriver(
     return {
       message: 'Error de validación. Revise los campos proporcionados.',
       errors: validatedFields.error.flatten().fieldErrors,
+      toastMessage: { type: 'error', message: 'Error de validación. Revise los campos.' }, // Añadir toast de error de validación
     };
   }
 
@@ -228,7 +232,10 @@ export async function updateDriver(
       data: dataToUpdate as any, // Usar 'as any' temporalmente si hay problemas de tipo persistentes con Prisma
     });
   } catch (error) {
-     return { message: handlePrismaError(error, 'actualizar') };
+     return {
+       message: handlePrismaError(error, 'actualizar'),
+       toastMessage: { type: 'error', message: handlePrismaError(error, 'actualizar') }, // Añadir toast de error
+     };
   }
 
   // 4. Revalidar la caché de la página de conductores y la página de edición
